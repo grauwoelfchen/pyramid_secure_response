@@ -15,9 +15,9 @@ Pyramid Secure Response
 Install
 -------
 
-::
+.. code:: zsh
 
-    $ pip install pyramid_secure_response
+    % pip install pyramid_secure_response
 
 
 Features
@@ -44,7 +44,7 @@ INI file
 
 like `PasteDeploy`_ config file.
 
-::
+.. code:: text
 
     pyramid.includes =
         pyramid_secure_response
@@ -54,13 +54,13 @@ Python
 
 Or you can include in python code.
 
-::
+.. code:: python
 
     config.include('pyramid_secure_response')
 
 It's also available to add tween(s) directly, as you need.
 
-::
+.. code:: python
 
     config.add_tween('pyramid_secure_response.ssl_redirect.tween')
     config.add_tween('pyramid_secure_response.hsts_support.tween')
@@ -70,7 +70,7 @@ See `pyramid.config.Configurator.add_tween`_.
 
 By default, *ssl_redirect* tween will be handled before *hsts_support*.
 
-::
+.. code:: python
 
     config.add_tween('pyramid_secure_response.ssl_redirect.tween',
                      over=tweens.MAIN)
@@ -82,7 +82,7 @@ Configuration
 
 For example:
 
-::
+.. code:: text
 
     pyramid_secure_response.ssl_redirect = False
 
@@ -135,13 +135,13 @@ Development
 
 See ``Makefile``.
 
-::
+.. code:: zsh
 
-    (venv) $ make check
-    (venv) $ make lint
+    (venv) % make check
+    (venv) % make lint
 
-    (venv) $ make test
-    (venv) $ make coverage
+    (venv) % make test
+    (venv) % make coverage
 
 
 License
