@@ -9,7 +9,7 @@ try:
     with open(os.path.join(here, *('doc', 'DESCRIPTION.rst'))) as f:
         DESCRIPTION = f.read()
     with open(os.path.join(here, 'CHANGELOG')) as f:
-        CHANGES = f.read()
+        CHANGELOG = f.read()
 except IOError:
     DESCRIPTION = ''
     CHANGELOG = ''
