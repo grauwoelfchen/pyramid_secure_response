@@ -2,14 +2,21 @@ Pyramid Secure Response
 =======================
 
 .. image:: https://gitlab.com/grauwoelfchen/pyramid_secure_response/badges/master/pipeline.svg
-    :target: https://gitlab.com/grauwoelfchen/pyramid_secure_response/commits/master
+        :target: https://gitlab.com/grauwoelfchen/pyramid_secure_response/commits/master
+        :alt: Pipeline Status
 
 .. image:: https://gitlab.com/grauwoelfchen/pyramid_secure_response/badges/master/coverage.svg
-    :target: https://gitlab.com/grauwoelfchen/pyramid_secure_response/commits/master
+        :target: https://gitlab.com/grauwoelfchen/pyramid_secure_response/commits/master
+        :alt: Coverage Report
 
 
 `pyramid_secure_response`_ handles insecure request to provide secure response
 (sets HSTS Header, redirects as https).
+
+Repository
+----------
+
+https://gitlab.com/grauwoelfchen/pyramid_secure_response
 
 
 Install
@@ -17,7 +24,7 @@ Install
 
 .. code:: zsh
 
-    % pip install pyramid_secure_response
+   % pip install pyramid_secure_response
 
 
 Features
@@ -44,10 +51,10 @@ INI file
 
 like `PasteDeploy`_ config file.
 
-.. code:: text
+.. code:: INI
 
-    pyramid.includes =
-        pyramid_secure_response
+   pyramid.includes =
+       pyramid_secure_response
 
 Python
 ~~~~~~
@@ -56,14 +63,14 @@ Or you can include in python code.
 
 .. code:: python
 
-    config.include('pyramid_secure_response')
+   config.include('pyramid_secure_response')
 
 It's also available to add tween(s) directly, as you need.
 
 .. code:: python
 
-    config.add_tween('pyramid_secure_response.ssl_redirect.tween')
-    config.add_tween('pyramid_secure_response.hsts_support.tween')
+   config.add_tween('pyramid_secure_response.ssl_redirect.tween')
+   config.add_tween('pyramid_secure_response.hsts_support.tween')
 
 You may want to add also kwargs ``under`` or ``over``. (
 See `pyramid.config.Configurator.add_tween`_.
@@ -72,9 +79,9 @@ By default, *ssl_redirect* tween will be handled before *hsts_support*.
 
 .. code:: python
 
-    config.add_tween('pyramid_secure_response.ssl_redirect.tween',
+   config.add_tween('pyramid_secure_response.ssl_redirect.tween',
                      over=tweens.MAIN)
-    config.add_tween('pyramid_secure_response.hsts_support.tween',
+   config.add_tween('pyramid_secure_response.hsts_support.tween',
                      over=tweens.MAIN, under='pyramid_secure_response.ssl_redirect.tween')
 
 Configuration
@@ -82,19 +89,19 @@ Configuration
 
 For example:
 
-.. code:: text
+.. code:: INI
 
-    pyramid_secure_response.ssl_redirect = False
+   pyramid_secure_response.ssl_redirect = False
 
-    pyramid_secure_response.hsts_support = True
-    pyramid_secure_response.hsts_max_age = 63072000
-    pyramid_secure_response.hsts_include_subdomains = True
-    pyramid_secure_response.hsts_preload = True
+   pyramid_secure_response.hsts_support = True
+   pyramid_secure_response.hsts_max_age = 63072000
+   pyramid_secure_response.hsts_include_subdomains = True
+   pyramid_secure_response.hsts_preload = True
 
-    pyramid_secure_response.proto_header = X-Forwarded-Proto
-    pyramid_secure_response.ignore_paths =
-        /_ah/health
-        /internal_api/xx
+   pyramid_secure_response.proto_header = X-Forwarded-Proto
+   pyramid_secure_response.ignore_paths =
+       /_ah/health
+       /internal_api/xx
 
 
 Default values
@@ -137,11 +144,11 @@ See ``Makefile``.
 
 .. code:: zsh
 
-    (venv) % make check
-    (venv) % make lint
+   (venv) % make check
+   (venv) % make lint
 
-    (venv) % make test
-    (venv) % make coverage
+   (venv) % make test
+   (venv) % make coverage
 
 
 License
@@ -152,7 +159,7 @@ BSD 3-Clause "New" or "Revised" License (``BSD-3-Clause``)
 See `LICENSE`_
 
 
-.. _`pyramid_secure_response`: /
+.. _`pyramid_secure_response`: https://pypi.python.org/pypi/pyramid-secure-response
 .. _`PasteDeploy`: https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/paste.html
 .. _`pyramid.config.Configurator.add_tween`: https://docs.pylonsproject.org/projects/pyramid/en/latest/api/config.html#pyramid.config.Configurator.add_tween
 .. _`LICENSE`: LICENSE
