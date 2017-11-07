@@ -1,0 +1,12 @@
+.python-version
+
+.coverage
+
+__pycache__
+*.pyc
+*.egg-info/
+
+.cache/
+dist/
+
+venv/

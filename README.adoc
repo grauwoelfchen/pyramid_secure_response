@@ -1,0 +1,98 @@
+= Pyramid Secure Response
+
+[source,bash]
+----
+$ pip install pyramid_secure_response
+----
+
+
+== Features
+
+=== Tweens
+
+- SSL Redirect
+- HSTS Header
+
+=== Additional features
+
+- Ignore Filter (matchhed paths with `str.startswith()`)
+
+
+== Usage
+
+=== .ini
+
+----
+pyramid.includes =
+    pyramid_secure_response
+----
+
+=== Python
+
+Or you can include in python code.
+
+[source,python]
+----
+config.include('pyramid_secure_response')
+----
+
+It's also available to add tween(s) directly, as you need.
+
+[source,python]
+----
+config.add_tween('pyramid_secure_response.ssl_redirect')
+config.add_tween('pyramid_secure_response.hsts_support')
+----
+
+=== Configuration
+
+For example:
+
+-----
+pyramid_secure_response.ssl_redirect = False
+
+pyramid_secure_response.hsts_support = True
+pyramid_secure_response.hsts_max_age = 63072000
+pyramid_secure_response.hsts_include_subdomains = True
+pyramid_secure_response.hsts_preload = True
+
+pyramid_secure_response.proto_header = 'X-Forwarded-Proto'
+pyramid_secure_response.ignore_paths =
+  /_ah/health
+  /internal_api/xx
+-----
+
+==== Default values
+
+|====
+| Key          | Value | Type
+| ssl_redirect | `'True'` | +bool+
+| hsts_support | `'True'` | +bool+
+| hsts_max_age | `'31536000'` | +str+
+| hsts_include_subdomains | `'True'` | +bool+
+| hsts_preload | `'True'` | +bool+
+| proto_header | `''` | +str+
+| ignore_paths | `''` | +list+
+|====
+
+
+
+== Development
+
+See +Makefile+.
+
+[source,bash]
+----
+(venv) $ make check
+(venv) $ make lint
+
+(venv) $ make test
+(venv) $ make coverage
+----
+
+
+== License
+
+BSD 3-Clause "New" or "Revised" License (+BSD-3-Clause+)
+
+See link:LICENSE[].

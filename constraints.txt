@@ -1,0 +1,12 @@
+pyramid>=1.8
+
+# development
+flake8==3.5.0
+flake8_docstrings==1.1.0
+pycodestyle==2.3.1
+pylint==1.7.4
+
+# testing
+pytest==3.0.5
+pytest-cov==2.4.0
+pytest-mock==1.6.2
