@@ -1,2 +1,6 @@
+08 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+	* Covret README.adoc to README.rst
+	* Add .gitlab-ci.yml
+
 07 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
 	* Initial commit ;)
