@@ -1,10 +1,10 @@
 stages:
-  - check
+  - vet
   - lint
   - test
 
 check:
-  stage: check
+  stage: vet
   image: python:3.5.4
   variables:
     PIP_CACHE_DIR: pip-cache
@@ -24,7 +24,7 @@ check:
     - tags
 
 lint:
-  stage: lint
+  stage: vet
   image: python:3.5.4
   variables:
     PIP_CACHE_DIR: pip-cache
@@ -44,7 +44,7 @@ lint:
     - tags
 
 test:
-  stage: lint
+  stage: test
   image: python:3.5.4
   variables:
     PIP_CACHE_DIR: pip-cache
