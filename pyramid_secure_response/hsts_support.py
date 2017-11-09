@@ -40,10 +40,10 @@ def tween(handler, registry):
         criteria = build_criteria(req, config)
         secure = all(criteria)
 
-        if secure:
+        # Sets the header only for https
+        if not secure:
+            logger.warning('(%s) Insecure request %s', tween_name, req.url)
             return handler(req)
-
-        logger.warning('(%s) Insecure request %s', tween_name, req.url)
 
         res = handler(req)
         res.headers['Strict-Transport-Security'] = build_hsts_header(config)
