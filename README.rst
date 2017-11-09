@@ -9,9 +9,13 @@ Pyramid Secure Response
         :target: https://gitlab.com/grauwoelfchen/pyramid_secure_response/commits/master
         :alt: Coverage Report
 
+.. image:: https://img.shields.io/pypi/v/pyramid_secure_response.svg
+        :target: https://pypi.python.org/pypi/pyramid_secure_response/
+        :alt: Version
+
 
 `pyramid_secure_response`_ handles insecure request to provide secure response
-(sets HSTS Header, redirects as https).
+(sets HSTS Header to https, redirects http as https).
 
 Repository
 ----------
@@ -33,7 +37,7 @@ Features
 ``pyramid_secure_response`` has 2 tweens.
 
 * SSL Redirect (+http+ request will be redirected as +https+ on same host)
-* HSTS Support (The ``HTTP Strict Transport Security`` header will be added)
+* HSTS Support (The ``HTTP Strict Transport Security`` will be set to https)
 
 And an additional feature.
 
