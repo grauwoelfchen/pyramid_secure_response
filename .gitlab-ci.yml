@@ -23,6 +23,26 @@ check:
   except:
     - tags
 
+check27:
+  stage: vet
+  image: python:2.7.14
+  variables:
+    PIP_CACHE_DIR: pip-cache
+  before_script:
+    - pip install --upgrade pip setuptools
+    - python --version
+    - pip --version
+    - pip install flake8 flake8-docstrings -c constraints.txt
+    - make clean
+  script:
+    - make check
+  cache:
+    untracked: true
+    paths:
+      - pip-cache
+  except:
+    - tags
+
 lint:
   stage: vet
   image: python:3.5.4
@@ -43,9 +63,48 @@ lint:
   except:
     - tags
 
+lint27:
+  stage: vet
+  image: python:2.7.14
+  variables:
+    PIP_CACHE_DIR: pip-cache
+  before_script:
+    - pip install --upgrade pip setuptools
+    - python --version
+    - pip --version
+    - ENV=development make setup
+    - ENV=test make setup
+  script:
+    - make lint
+  cache:
+    untracked: true
+    paths:
+      - pip-cache
+  except:
+    - tags
+
 test:
   stage: test
   image: python:3.5.4
+  variables:
+    PIP_CACHE_DIR: pip-cache
+  before_script:
+    - pip install --upgrade pip setuptools
+    - python --version
+    - pip --version
+    - ENV=test make setup
+  script:
+    - make coverage
+  cache:
+    untracked: true
+    paths:
+      - pip-cache
+  except:
+    - tags
+
+test27:
+  stage: test
+  image: python:2.7.14
   variables:
     PIP_CACHE_DIR: pip-cache
   before_script:

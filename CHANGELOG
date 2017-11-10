@@ -1,12 +1,15 @@
-09 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+Fri 10 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+	* Add Python 2.7 support (Make type hints as comment)
+
+Thu 09 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
 	* Bump version v0.0.2, v0.0.3
 	* Update package description and classifiers
 	* Enable HSTS Header only for ssl request
 	* Add test case for X-Forwarded-Proto use
 
-08 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+Wed 08 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
 	* Covret README.adoc to README.rst
 	* Add .gitlab-ci.yml
 
-07 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+Tue 07 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
 	* Initial commit ;)

@@ -8,6 +8,7 @@ logger = logging.getLogger(PACKAGE_NAME)  # pylint: disable=invalid-name
 
 
 def get_config_value_fn(registry, config_key=PACKAGE_NAME):
+    # type: (Registry, str) -> 'function'
     """Gets configured value from .ini file via registry."""
     if not config_key:
         raise ValueError
@@ -31,7 +32,7 @@ def get_config_value_fn(registry, config_key=PACKAGE_NAME):
     return _get_value
 
 
-def get_config(registry):
+def get_config(registry):  # type: (Registry) -> namedtuple
     """Returns namedtuple instance object has configuration."""
     get_value = get_config_value_fn(registry)
 
@@ -53,13 +54,13 @@ def get_config(registry):
     return Config(**dict([(k, get_value(k, v)) for k, v in defaults]))
 
 
-def apply_ignore_filter(req, ignore_paths: tuple) -> bool:
+def apply_ignore_filter(req, ignore_paths):  # type: (Request, tuple) -> bool
     if ignore_paths:
         return any([req.path.startswith(path) for path in ignore_paths])
     return False
 
 
-def build_criteria(req, config: namedtuple) -> tuple:
+def build_criteria(req, config):  # type: (Request, namedtuple) -> tuple
     """Builds criteria contains about incoming request."""
     criteria = [
         req.url.startswith('https://'),

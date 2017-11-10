@@ -1,10 +1,8 @@
 import pytest
 
-from pyramid.request import Request
-
 
 @pytest.fixture(scope='function')
-def dummy_request() -> Request:
+def dummy_request():  # type: () -> Request
     from pyramid import testing
 
     url = 'http://example.org'
