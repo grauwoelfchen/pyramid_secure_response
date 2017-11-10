@@ -62,6 +62,7 @@ setup(
         'Framework :: Pyramid',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 2',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Security',
     ],
