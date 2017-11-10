@@ -2,6 +2,7 @@ stages:
   - vet
   - lint
   - test
+  - coverage
 
 check:
   stage: vet
@@ -94,7 +95,7 @@ test:
     - pip --version
     - ENV=test make setup
   script:
-    - make coverage
+    - make test
   cache:
     untracked: true
     paths:
@@ -113,10 +114,33 @@ test27:
     - pip --version
     - ENV=test make setup
   script:
+    - make test
+  cache:
+    untracked: true
+    paths:
+      - pip-cache
+  except:
+    - tags
+
+coverage:
+  stage: coverage
+  image: python:3.5.4
+  variables:
+    PIP_CACHE_DIR: pip-cache
+  before_script:
+    - pip install --upgrade pip setuptools
+    - python --version
+    - pip --version
+    - ENV=test make setup
+  script:
     - make coverage
   cache:
     untracked: true
     paths:
       - pip-cache
+  artifacts:
+    untracked: true
+    paths:
+      - .coverage
   except:
     - tags
