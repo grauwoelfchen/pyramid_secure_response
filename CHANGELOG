@@ -1,4 +1,5 @@
 Fri 10 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+	* Bump version v0.0.4
 	* Add Python 2.7 support (Make type hints as comment)
 
 Thu 09 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
