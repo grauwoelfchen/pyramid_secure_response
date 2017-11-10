@@ -28,7 +28,7 @@ Install
 
 .. code:: zsh
 
-   % pip install pyramid_secure_response
+    % pip install pyramid_secure_response
 
 
 Features
@@ -57,8 +57,8 @@ like `PasteDeploy`_ config file.
 
 .. code:: INI
 
-   pyramid.includes =
-       pyramid_secure_response
+    pyramid.includes =
+        pyramid_secure_response
 
 Python
 ~~~~~~
@@ -67,25 +67,25 @@ Or you can include in python code.
 
 .. code:: python
 
-   config.include('pyramid_secure_response')
+    config.include('pyramid_secure_response')
 
 It's also available to add tween(s) directly, as you need.
 
 .. code:: python
 
-   config.add_tween('pyramid_secure_response.ssl_redirect.tween')
-   config.add_tween('pyramid_secure_response.hsts_support.tween')
+    config.add_tween('pyramid_secure_response.ssl_redirect.tween')
+    config.add_tween('pyramid_secure_response.hsts_support.tween')
 
 You may want to add also kwargs ``under`` or ``over``. (
-See `pyramid.config.Configurator.add_tween`_.
+See `pyramid.config.Configurator.add_tween`_.)
 
 By default, *ssl_redirect* tween will be handled before *hsts_support*.
 
 .. code:: python
 
-   config.add_tween('pyramid_secure_response.ssl_redirect.tween',
+    config.add_tween('pyramid_secure_response.ssl_redirect.tween',
                      over=tweens.MAIN)
-   config.add_tween('pyramid_secure_response.hsts_support.tween',
+    config.add_tween('pyramid_secure_response.hsts_support.tween',
                      over=tweens.MAIN, under='pyramid_secure_response.ssl_redirect.tween')
 
 Configuration
@@ -95,17 +95,17 @@ For example:
 
 .. code:: INI
 
-   pyramid_secure_response.ssl_redirect = False
+    pyramid_secure_response.ssl_redirect = False
 
-   pyramid_secure_response.hsts_support = True
-   pyramid_secure_response.hsts_max_age = 63072000
-   pyramid_secure_response.hsts_include_subdomains = True
-   pyramid_secure_response.hsts_preload = True
+    pyramid_secure_response.hsts_support = True
+    pyramid_secure_response.hsts_max_age = 63072000
+    pyramid_secure_response.hsts_include_subdomains = True
+    pyramid_secure_response.hsts_preload = True
 
-   pyramid_secure_response.proto_header = X-Forwarded-Proto
-   pyramid_secure_response.ignore_paths =
-       /_ah/health
-       /internal_api/xx
+    pyramid_secure_response.proto_header = X-Forwarded-Proto
+    pyramid_secure_response.ignore_paths =
+        /_ah/health
+        /internal_api/xx
 
 
 Default values
@@ -148,11 +148,11 @@ See ``Makefile``.
 
 .. code:: zsh
 
-   (venv) % make check
-   (venv) % make lint
+    (venv) % make check
+    (venv) % make lint
 
-   (venv) % make test
-   (venv) % make coverage
+    (venv) % make test
+    (venv) % make coverage
 
 
 License
