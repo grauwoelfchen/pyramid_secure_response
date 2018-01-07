@@ -11,18 +11,18 @@ def setup():
 
 
 def test_redirect_tween_ssl_redirect_off(mocker, dummy_request):
-    mocker.patch('pyramid_secure_response.ssl_redirect.apply_ignore_filter',
+    mocker.patch('pyramid_secure_response.ssl_redirect.apply_path_filter',
                  return_value=True)
     mocker.patch('pyramid_secure_response.ssl_redirect.build_criteria',
                  return_value=[])
 
     from pyramid_secure_response.ssl_redirect import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
     dummy_request.registry.settings = {
-        'pyramid_secure_response.ssl_redirect': 'False'
+        'pyramid_secure_response.ssl_redirect.enabled': 'False'
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -31,25 +31,25 @@ def test_redirect_tween_ssl_redirect_off(mocker, dummy_request):
 
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
-    assert 0 == apply_ignore_filter.call_count
+    assert 0 == apply_path_filter.call_count
     assert 0 == build_criteria.call_count
 
 
 def test_redirect_tween_ignored_path(mocker, dummy_request):
-    mocker.patch('pyramid_secure_response.ssl_redirect.apply_ignore_filter',
+    mocker.patch('pyramid_secure_response.ssl_redirect.apply_path_filter',
                  return_value=True)
     mocker.patch('pyramid_secure_response.ssl_redirect.build_criteria',
                  return_value=[])
 
     from pyramid_secure_response.ssl_redirect import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
     dummy_request.path = '/humans.txt'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.ssl_redirect': 'True',
-        'pyramid_secure_response.ignore_paths': '\n/humans.txt\n'
+        'pyramid_secure_response.ssl_redirect.enabled': 'True',
+        'pyramid_secure_response.ssl_redirect.ignore_paths': '\n/humans.txt\n'
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -58,14 +58,14 @@ def test_redirect_tween_ignored_path(mocker, dummy_request):
 
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(
         dummy_request, ('/humans.txt',))
     assert 0 == build_criteria.call_count
 
 
 def test_redirect_tween_insecure(mocker, dummy_request):
-    mocker.patch('pyramid_secure_response.ssl_redirect.apply_ignore_filter',
+    mocker.patch('pyramid_secure_response.ssl_redirect.apply_path_filter',
                  return_value=False)
     mocker.patch('pyramid_secure_response.ssl_redirect.build_criteria',
                  return_value=[False])
@@ -73,13 +73,13 @@ def test_redirect_tween_insecure(mocker, dummy_request):
     from pyramid.httpexceptions import HTTPMovedPermanently
 
     from pyramid_secure_response.ssl_redirect import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
     dummy_request.url = 'http://example.org/'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.ssl_redirect': 'True',
+        'pyramid_secure_response.ssl_redirect.enabled': 'True',
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -90,25 +90,25 @@ def test_redirect_tween_insecure(mocker, dummy_request):
 
     # pylint: disable=no-member
     assert 0 == handler_stub.call_count
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(dummy_request, tuple())
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(dummy_request, tuple())
     assert 1 == build_criteria.call_count
 
 
 def test_redirect_tween_secure(mocker, dummy_request):
-    mocker.patch('pyramid_secure_response.ssl_redirect.apply_ignore_filter',
+    mocker.patch('pyramid_secure_response.ssl_redirect.apply_path_filter',
                  return_value=False)
     mocker.patch('pyramid_secure_response.ssl_redirect.build_criteria',
                  return_value=[True])
 
     from pyramid_secure_response.ssl_redirect import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
     dummy_request.url = 'https://example.org/'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.ssl_redirect': 'True',
+        'pyramid_secure_response.ssl_redirect.enabled': 'True',
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -117,6 +117,6 @@ def test_redirect_tween_secure(mocker, dummy_request):
 
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(dummy_request, tuple())
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(dummy_request, tuple())
     assert 1 == build_criteria.call_count

@@ -14,8 +14,15 @@ Pyramid Secure Response
         :alt: Version
 
 
-`pyramid_secure_response`_ handles insecure request to provide secure response
-(sets HSTS Header to https, redirects http as https).
+`pyramid_secure_response`_ handles insecure request to provide secure response.
+
+* redirects http as https
+* sets HSTS Header to response
+
+For response headers (hsts), the tweens do not set anything if that
+already exist in your response. This means you can set by yourself as you need
+(e.g. at view action)
+
 
 Repository
 ----------
@@ -34,12 +41,14 @@ Install
 Features
 --------
 
-``pyramid_secure_response`` has 2 tweens.
+``pyramid_secure_response`` has 2 tweens:
 
-* SSL Redirect (+http+ request will be redirected as +https+ on same host)
-* HSTS Support (The ``HTTP Strict Transport Security`` will be set to https)
+* HTTP Redirecton (`ssl_redirect`_, +http+ request will be redirected as
+  +https+ on same host)
+* HSTS Support (`hsts_support`_, The ``HTTP Strict Transport Security`` will be
+  set in response)
 
-And an additional feature.
+With an additional feature.
 
 * Ignore path filter (matched paths with ``str.startswith()`` will be ignored)
 
@@ -79,7 +88,7 @@ It's also available to add tween(s) directly, as you need.
 You may want to add also kwargs ``under`` or ``over``. (
 See `pyramid.config.Configurator.add_tween`_.)
 
-By default, *ssl_redirect* tween will be handled before *hsts_support*.
+By default, *ssl_redirect* tween will be handled before another tweens.
 
 .. code:: python
 
@@ -95,49 +104,83 @@ For example:
 
 .. code:: INI
 
-    pyramid_secure_response.ssl_redirect = False
+    pyramid_secure_response.ssl_redirect.enabled = False
 
-    pyramid_secure_response.hsts_support = True
-    pyramid_secure_response.hsts_max_age = 63072000
-    pyramid_secure_response.hsts_include_subdomains = True
-    pyramid_secure_response.hsts_preload = True
+    pyramid_secure_response.hsts_support.enabled = True
+    pyramid_secure_response.hsts_support.max_age = 63072000
+    pyramid_secure_response.hsts_support.include_subdomains = True
+    pyramid_secure_response.hsts_support.preload = True
 
+    # fallback (global)
     pyramid_secure_response.proto_header = X-Forwarded-Proto
     pyramid_secure_response.ignore_paths =
         /_ah/health
-        /internal_api/xx
-
+        /internal_api/xxx
 
 Default values
 **************
 
-+-------------------------+----------------+--------+-------------------------+
-| Key                     | Value (INI)    | Type   | Note                    |
-+=========================+================+========+=========================+
-| ssl_redirect            | ``'True'``     | *bool* | Enable ``ssl_redirect`` |
-|                         |                |        | tween                   |
-+-------------------------+----------------+--------+-------------------------+
-| hsts_support            | ``'True'``     | *bool* | Enable ``hsts_support`` |
-|                         |                |        | tween                   |
-+-------------------------+----------------+--------+-------------------------+
-| hsts_max_age            | ``'31536000'`` | *str*  | Add *max-age=N* into    |
-|                         |                |        | HSTS Header (seconds)   |
-+-------------------------+----------------+--------+-------------------------+
-| hsts_include_subdomains | ``'True'``     | *bool* | Add *includeSubdomains* |
-|                         |                |        | into HSTS Header        |
-+-------------------------+----------------+--------+-------------------------+
-| hsts_preload            | ``'True'``     | *bool* | Add *preload* into      |
-|                         |                |        | HSTS Header             |
-+-------------------------+----------------+--------+-------------------------+
-| proto_header            | ``''``         | *str*  | An header like          |
-|                         |                |        | *X-Forwarded-Proto*.    |
-|                         |                |        | Checked in criteria as  |
-|                         |                |        | ``'https'``, if exists. |
-+-------------------------+----------------+--------+-------------------------+
-| ignore_paths            | ``''``         | *list* | Splittable string like  |
-|                         |                |        | *\n/path\n/path\n*.     |
-|                         |                |        | Skiped, if matched.     |
-+-------------------------+----------------+--------+-------------------------+
+(ssl_redirect)
+
++--------------+----------------+--------+-------------------------+
+| Key          | Value (INI)    | Type   | Note                    |
++==============+================+========+=========================+
+| enabled      | ``'True'``     | *bool* | Enable ``ssl_redirect`` |
+|              |                |        | tween                   |
++--------------+----------------+--------+-------------------------+
+| proto_header | ``''``         | *str*  | An header like          |
+|              |                |        | *X-Forwarded-Proto*.    |
+|              |                |        | Checked in criteria as  |
+|              |                |        | ``'https'``, if exists. |
++--------------+----------------+--------+-------------------------+
+| ignore_paths | ``''``         | *list* | Splittable string like  |
+|              |                |        | *\n/path\n/path\n*.     |
+|              |                |        | Skiped, if matched.     |
++--------------+----------------+--------+-------------------------+
+
+(hsts_support)
+
++--------------------+----------------+--------+-------------------------+
+| Key                | Value (INI)    | Type   | Note                    |
++====================+================+========+=========================+
+| enabled            | ``'True'``     | *bool* | Enable ``hsts_support`` |
+|                    |                |        | tween                   |
++--------------------+----------------+--------+-------------------------+
+| max_age            | ``'31536000'`` | *str*  | Add *max-age=N* into    |
+|                    |                |        | HSTS Header (seconds)   |
++--------------------+----------------+--------+-------------------------+
+| include_subdomains | ``'True'``     | *bool* | Add *includeSubdomains* |
+|                    |                |        | into HSTS Header        |
++--------------------+----------------+--------+-------------------------+
+| preload            | ``'True'``     | *bool* | Add *preload* into      |
+|                    |                |        | HSTS Header             |
++--------------------+----------------+--------+-------------------------+
+| proto_header       | ``''``         | *str*  | An header like          |
+|                    |                |        | *X-Forwarded-Proto*.    |
+|                    |                |        | Checked in criteria as  |
+|                    |                |        | ``'https'``, if exists. |
++--------------------+----------------+--------+-------------------------+
+| ignore_paths       | ``''``         | *list* | Splittable string like  |
+|                    |                |        | *\n/path\n/path\n*.     |
+|                    |                |        | Skiped, if matched.     |
++--------------------+----------------+--------+-------------------------+
+
+These values are like a global variables. If exist, its are also applied
+to all tweens as fallback (If same keys are already exist for the tweens, it
+will be taken priority, over these values).
+
++---------------+----------------+--------+-------------------------+
+| Key           | Value (INI)    | Type   | Note                    |
++===============+================+========+=========================+
+| proto_header  | ``''``         | *str*  | An header like          |
+|               |                |        | *X-Forwarded-Proto*.    |
+|               |                |        | Checked in criteria as  |
+|               |                |        | ``'https'``, if exists. |
++---------------+----------------+--------+-------------------------+
+| ignore_paths  | ``''``         | *list* | Splittable string like  |
+|               |                |        | *\n/path\n/path\n*.     |
+|               |                |        | Skiped, if matched.     |
++---------------+----------------+--------+-------------------------+
 
 
 

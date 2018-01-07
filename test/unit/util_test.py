@@ -2,7 +2,7 @@ import pytest
 
 from pyramid_secure_response.util import (
     get_config,
-    apply_ignore_filter,
+    apply_path_filter,
     build_criteria,
 )
 
@@ -10,26 +10,31 @@ from pyramid_secure_response.util import (
 def test_get_config_keys(dummy_request):
     config = get_config(dummy_request.registry)
     expected_keys = (
-        'hsts_support',
-        'ssl_redirect',
         'proto_header',
         'ignore_paths',
-        'hsts_max_age',
-        'hsts_include_subdomains',
-        'hsts_preload',
+        'ssl_redirect',
+        'hsts_support',
     )
     assert expected_keys == tuple(config._asdict().keys())
 
 
 @pytest.mark.parametrize('config_key,default_value', [
-    ('hsts_support', True),
-    ('ssl_redirect', True),
     ('proto_header', ''),
     ('ignore_paths', tuple()),
+    ('ssl_redirect.enabled', True),
+    ('ssl_redirect.proto_header', ''),
+    ('ssl_redirect.ignore_paths', tuple()),
+    ('hsts_support.enabled', True),
+    ('hsts_support.proto_header', ''),
+    ('hsts_support.ignore_paths', tuple()),
 ])
 def test_get_config_defaults(dummy_request, config_key, default_value):
     config = get_config(dummy_request.registry)
-    assert default_value == getattr(config, config_key)
+    keys = config_key.split('.')
+    if len(keys) == 1:
+        assert default_value == getattr(config, keys[0])
+    else:
+        assert default_value == getattr(getattr(config, keys[0]), keys[1])
 
 
 @pytest.mark.parametrize('paths', [
@@ -38,18 +43,18 @@ def test_get_config_defaults(dummy_request, config_key, default_value):
     ('humans.txt', 'robots.txt'),
     ('/static/humans.txt',),
 ])
-def test_apply_ignore_filter_as_not_ignored(dummy_request, paths):
+def test_apply_path_filter_as_not_ignored(dummy_request, paths):
     dummy_request.path = '/humans.txt'
-    assert not apply_ignore_filter(dummy_request, paths)
+    assert not apply_path_filter(dummy_request, paths)
 
 
 @pytest.mark.parametrize('paths', [
     ('/humans.txt',),
     ('/humans.txt', '/robots.txt'),
 ])
-def test_apply_ignore_filter_as_ignored(dummy_request, paths):
+def test_apply_path_filter_as_ignored(dummy_request, paths):
     dummy_request.path = '/humans.txt'
-    assert apply_ignore_filter(dummy_request, paths)
+    assert apply_path_filter(dummy_request, paths)
 
 
 @pytest.mark.parametrize('url,proto_header,header,value', [
@@ -71,7 +76,7 @@ def test_criteria_not_all_secure(dummy_request, url, proto_header,
     Config = namedtuple('Config', 'proto_header')
     config = Config(proto_header)
 
-    criteria = build_criteria(dummy_request, config)
+    criteria = build_criteria(dummy_request, proto_header=config.proto_header)
     assert not all(criteria)
 
 
@@ -91,5 +96,5 @@ def test_criteria_all_secure(dummy_request, url, proto_header,
     Config = namedtuple('Config', 'proto_header')
     config = Config(proto_header)
 
-    criteria = build_criteria(dummy_request, config)
+    criteria = build_criteria(dummy_request, proto_header=config.proto_header)
     assert all(criteria)
