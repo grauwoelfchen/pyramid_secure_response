@@ -1,17 +1,19 @@
 from pyramid_secure_response.util import (
     logger,
-    apply_ignore_filter,
+    apply_path_filter,
     get_config,
     build_criteria,
 )
 
+HEADER_KEY = 'Strict-Transport-Security'
+
 
 def build_hsts_header(config):
     """Returns HSTS Header value."""
-    value = 'max-age={0}'.format(config.hsts_max_age)
-    if config.hsts_include_subdomains:
+    value = 'max-age={0}'.format(config.max_age)
+    if config.include_subdomains:
         value += '; includeSubDomains'
-    if config.hsts_preload:
+    if config.preload:
         value += '; preload'
     return value
 
@@ -27,26 +29,40 @@ def tween(handler, registry):
     """
     config = get_config(registry)
 
+    hsts_support = config.hsts_support
+
+    ignore_paths = config.ignore_paths
+    if hsts_support.ignore_paths:
+        ignore_paths = hsts_support.ignore_paths
+
+    proto_header = config.proto_header
+    if hsts_support.proto_header:
+        proto_header = hsts_support.proto_header
+
     tween_name = 'hsts_support'
 
     def _hsts_support_tween(req):
-        if not config.hsts_support:
+        if not hsts_support.enabled:
             return handler(req)
 
-        if apply_ignore_filter(req, config.ignore_paths):
-            logger.info('(%s) Ignored path %s', tween_name, req.path)
+        # ignore
+        if apply_path_filter(req, ignore_paths):
+            logger.info('(%s) Ignore path %s', tween_name, req.path)
             return handler(req)
 
-        criteria = build_criteria(req, config)
+        criteria = build_criteria(req, proto_header=proto_header)
         secure = all(criteria)
 
-        # Sets the header only for https
         if not secure:
+            # sets the header only for https
             logger.warning('(%s) Insecure request %s', tween_name, req.url)
             return handler(req)
 
         res = handler(req)
-        res.headers['Strict-Transport-Security'] = build_hsts_header(config)
+
+        if HEADER_KEY not in res.headers:
+            # ignore if already exists
+            res.headers[HEADER_KEY] = build_hsts_header(hsts_support)
 
         return res
 

@@ -19,30 +19,30 @@ def test_build_hsts_header(max_age, include_subdomains, preload, header):
     from collections import namedtuple
     from pyramid_secure_response.hsts_support import build_hsts_header
 
-    Config = namedtuple('Config', (  # pylint: disable=invalid-name
-        'hsts_max_age',
-        'hsts_include_subdomains',
-        'hsts_preload',
+    Config = namedtuple('hsts_support', (  # pylint: disable=invalid-name
+        'max_age',
+        'include_subdomains',
+        'preload',
     ))
-    config = Config(max_age, include_subdomains, preload)
+    hsts_support = Config(max_age, include_subdomains, preload)
 
-    assert header == build_hsts_header(config)
+    assert header == build_hsts_header(hsts_support)
 
 
 def test_hsts_support_tween_with_disabled(mocker, dummy_request):
-    mocker.patch('pyramid_secure_response.hsts_support.apply_ignore_filter',
+    mocker.patch('pyramid_secure_response.hsts_support.apply_path_filter',
                  return_value=True)
     mocker.patch('pyramid_secure_response.hsts_support.build_criteria',
                  return_value=[])
 
     from pyramid.response import Response
     from pyramid_secure_response.hsts_support import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
     dummy_request.registry.settings = {
-        'pyramid_secure_response.hsts_support': 'False'
+        'pyramid_secure_response.hsts_support.enabled': 'False'
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -52,27 +52,27 @@ def test_hsts_support_tween_with_disabled(mocker, dummy_request):
 
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
-    assert 0 == apply_ignore_filter.call_count
+    assert 0 == apply_path_filter.call_count
     assert 0 == build_criteria.call_count
     assert 'Strict-Transport-Security' not in res.headers
 
 
 def test_hsts_support_tween_with_ignored_path(mocker, dummy_request):
-    mocker.patch('pyramid_secure_response.hsts_support.apply_ignore_filter',
+    mocker.patch('pyramid_secure_response.hsts_support.apply_path_filter',
                  return_value=True)
     mocker.patch('pyramid_secure_response.hsts_support.build_criteria',
                  return_value=[])
 
     from pyramid.response import Response
     from pyramid_secure_response.hsts_support import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
     dummy_request.path = '/humans.txt'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.hsts_support': 'True',
-        'pyramid_secure_response.ignore_paths': '\n/humans.txt\n'
+        'pyramid_secure_response.hsts_support.enabled': 'True',
+        'pyramid_secure_response.hsts_support.ignore_paths': '\n/humans.txt\n'
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -82,8 +82,8 @@ def test_hsts_support_tween_with_ignored_path(mocker, dummy_request):
 
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(
         dummy_request, ('/humans.txt',))
     assert 0 == build_criteria.call_count
     assert 'Strict-Transport-Security' not in res.headers
@@ -91,12 +91,12 @@ def test_hsts_support_tween_with_ignored_path(mocker, dummy_request):
 
 def test_hsts_tween_with_none_ssl_request(mocker, dummy_request):
     from pyramid_secure_response import hsts_support
-    mocker.spy(hsts_support, 'apply_ignore_filter')
+    mocker.spy(hsts_support, 'apply_path_filter')
     mocker.spy(hsts_support, 'build_criteria')
 
     from pyramid.response import Response
     from pyramid_secure_response.hsts_support import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
@@ -104,12 +104,12 @@ def test_hsts_tween_with_none_ssl_request(mocker, dummy_request):
 
     dummy_request.url = 'http://example.org/'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.hsts_support': 'True',
-        'pyramid_secure_response.hsts_max_age': '31536000',
-        'pyramid_secure_response.hsts_include_subdomains': 'True',
-        'pyramid_secure_response.hsts_preload': 'True',
-        'pyramid_secure_response.proto_header': '',
-        'pyramid_secure_response.ignore_paths': '\n',
+        'pyramid_secure_response.hsts_support.enabled': 'True',
+        'pyramid_secure_response.hsts_support.max_age': '31536000',
+        'pyramid_secure_response.hsts_support.include_subdomains': 'True',
+        'pyramid_secure_response.hsts_support.preload': 'True',
+        'pyramid_secure_response.hsts_support.proto_header': '',
+        'pyramid_secure_response.hsts_support.ignore_paths': '\n',
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -120,12 +120,13 @@ def test_hsts_tween_with_none_ssl_request(mocker, dummy_request):
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
 
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(dummy_request, tuple())
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(dummy_request, tuple())
 
     assert 1 == build_criteria.call_count
     config = get_config(dummy_request.registry)
-    build_criteria.assert_called_once_with(dummy_request, config)
+    build_criteria.assert_called_once_with(
+        dummy_request, proto_header=config.hsts_support.proto_header)
 
     assert 'Strict-Transport-Security' not in res.headers
 
@@ -133,12 +134,12 @@ def test_hsts_tween_with_none_ssl_request(mocker, dummy_request):
 def test_hsts_tween_with_ssl_request_plus_none_ssl_extra_header(
         mocker, dummy_request):
     from pyramid_secure_response import hsts_support
-    mocker.spy(hsts_support, 'apply_ignore_filter')
+    mocker.spy(hsts_support, 'apply_path_filter')
     mocker.spy(hsts_support, 'build_criteria')
 
     from pyramid.response import Response
     from pyramid_secure_response.hsts_support import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
@@ -147,12 +148,13 @@ def test_hsts_tween_with_ssl_request_plus_none_ssl_extra_header(
     dummy_request.url = 'https://example.org/'
     dummy_request.headers['X-Forwarded-Proto'] = 'http'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.hsts_support': 'True',
-        'pyramid_secure_response.hsts_max_age': '3600',
-        'pyramid_secure_response.hsts_include_subdomains': 'True',
-        'pyramid_secure_response.hsts_preload': 'True',
-        'pyramid_secure_response.proto_header': 'X-Forwarded-Proto',
-        'pyramid_secure_response.ignore_paths': '\n',
+        'pyramid_secure_response.hsts_support.enabled': 'True',
+        'pyramid_secure_response.hsts_support.max_age': '3600',
+        'pyramid_secure_response.hsts_support.include_subdomains': 'True',
+        'pyramid_secure_response.hsts_support.preload': 'True',
+        'pyramid_secure_response.hsts_support.proto_header':
+            'X-Forwarded-Proto',
+        'pyramid_secure_response.hsts_support.ignore_paths': '\n',
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -163,24 +165,25 @@ def test_hsts_tween_with_ssl_request_plus_none_ssl_extra_header(
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
 
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(dummy_request, tuple())
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(dummy_request, tuple())
 
     assert 1 == build_criteria.call_count
     config = get_config(dummy_request.registry)
-    build_criteria.assert_called_once_with(dummy_request, config)
+    build_criteria.assert_called_once_with(
+        dummy_request, proto_header=config.hsts_support.proto_header)
 
     assert 'Strict-Transport-Security' not in res.headers
 
 
 def test_hsts_tween_with_ssl_request(mocker, dummy_request):
     from pyramid_secure_response import hsts_support
-    mocker.spy(hsts_support, 'apply_ignore_filter')
+    mocker.spy(hsts_support, 'apply_path_filter')
     mocker.spy(hsts_support, 'build_criteria')
 
     from pyramid.response import Response
     from pyramid_secure_response.hsts_support import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
@@ -188,12 +191,12 @@ def test_hsts_tween_with_ssl_request(mocker, dummy_request):
 
     dummy_request.url = 'https://example.org/'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.hsts_support': 'True',
-        'pyramid_secure_response.hsts_max_age': '300',  # 5 minutes
-        'pyramid_secure_response.hsts_include_subdomains': 'True',
-        'pyramid_secure_response.hsts_preload': 'True',
-        'pyramid_secure_response.proto_header': '',
-        'pyramid_secure_response.ignore_paths': '\n',
+        'pyramid_secure_response.hsts_support.enabled': 'True',
+        'pyramid_secure_response.hsts_support.max_age': '300',  # 5 minutes.
+        'pyramid_secure_response.hsts_support.include_subdomains': 'True',
+        'pyramid_secure_response.hsts_support.preload': 'True',
+        'pyramid_secure_response.hsts_support.proto_header': '',
+        'pyramid_secure_response.hsts_support.ignore_paths': '\n',
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -204,12 +207,13 @@ def test_hsts_tween_with_ssl_request(mocker, dummy_request):
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
 
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(dummy_request, tuple())
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(dummy_request, tuple())
 
     assert 1 == build_criteria.call_count
     config = get_config(dummy_request.registry)
-    build_criteria.assert_called_once_with(dummy_request, config)
+    build_criteria.assert_called_once_with(
+        dummy_request, proto_header=config.hsts_support.proto_header)
 
     assert 'Strict-Transport-Security' in res.headers
     assert 'max-age=300; includeSubDomains; preload' == \
@@ -219,12 +223,12 @@ def test_hsts_tween_with_ssl_request(mocker, dummy_request):
 def test_hsts_tween_with_ssl_request_plus_extra_header_check(
         mocker, dummy_request):
     from pyramid_secure_response import hsts_support
-    mocker.spy(hsts_support, 'apply_ignore_filter')
+    mocker.spy(hsts_support, 'apply_path_filter')
     mocker.spy(hsts_support, 'build_criteria')
 
     from pyramid.response import Response
     from pyramid_secure_response.hsts_support import (
-        apply_ignore_filter,
+        apply_path_filter,
         build_criteria,
     )
 
@@ -233,12 +237,13 @@ def test_hsts_tween_with_ssl_request_plus_extra_header_check(
     dummy_request.url = 'https://example.org/'
     dummy_request.headers['X-Forwarded-Proto'] = 'https'
     dummy_request.registry.settings = {
-        'pyramid_secure_response.hsts_support': 'True',
-        'pyramid_secure_response.hsts_max_age': '604800',  # 1 week
-        'pyramid_secure_response.hsts_include_subdomains': 'True',
-        'pyramid_secure_response.hsts_preload': 'True',
-        'pyramid_secure_response.proto_header': 'X-Forwarded-Proto',
-        'pyramid_secure_response.ignore_paths': '\n',
+        'pyramid_secure_response.hsts_support.enabled': 'True',
+        'pyramid_secure_response.hsts_support.max_age': '604800',  # 1 week
+        'pyramid_secure_response.hsts_support.include_subdomains': 'True',
+        'pyramid_secure_response.hsts_support.preload': 'True',
+        'pyramid_secure_response.hsts_support.proto_header':
+            'X-Forwarded-Proto',
+        'pyramid_secure_response.hsts_support.ignore_paths': '\n',
     }
 
     handler_stub = mocker.stub(name='handler_stub')
@@ -249,12 +254,13 @@ def test_hsts_tween_with_ssl_request_plus_extra_header_check(
     # pylint: disable=no-member
     assert 1 == handler_stub.call_count
 
-    assert 1 == apply_ignore_filter.call_count
-    apply_ignore_filter.assert_called_once_with(dummy_request, tuple())
+    assert 1 == apply_path_filter.call_count
+    apply_path_filter.assert_called_once_with(dummy_request, tuple())
 
     assert 1 == build_criteria.call_count
     config = get_config(dummy_request.registry)
-    build_criteria.assert_called_once_with(dummy_request, config)
+    build_criteria.assert_called_once_with(
+        dummy_request, proto_header=config.hsts_support.proto_header)
 
     assert 'Strict-Transport-Security' in res.headers
     assert 'max-age=604800; includeSubDomains; preload' == \

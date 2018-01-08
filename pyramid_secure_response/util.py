@@ -7,7 +7,7 @@ from pyramid_secure_response import __name__ as PACKAGE_NAME
 logger = logging.getLogger(PACKAGE_NAME)  # pylint: disable=invalid-name
 
 
-def get_config_value_fn(registry, config_key=PACKAGE_NAME):
+def _get_config_value_f(registry, config_key=''):
     # type: (Registry, str) -> 'function'
     """Gets configured value from .ini file via registry."""
     if not config_key:
@@ -15,7 +15,7 @@ def get_config_value_fn(registry, config_key=PACKAGE_NAME):
 
     s = registry.settings
 
-    def _get_value(key, default):
+    def _get_value_f(key, default):
         v = s.get('{:s}.{:s}'.format(config_key, key), default)
         if v == default:
             return v
@@ -29,44 +29,71 @@ def get_config_value_fn(registry, config_key=PACKAGE_NAME):
 
         return v
 
-    return _get_value
+    return _get_value_f
+
+
+def _build_config(prefix='', defaults=tuple(), registry=None):
+    # pylint: disable=invalid-name
+    if prefix:
+        config_key = '{:s}.{:s}'.format(PACKAGE_NAME, prefix)
+    else:
+        config_key = PACKAGE_NAME
+
+    get_value_f = _get_config_value_f(registry, config_key=config_key)
+
+    Config = namedtuple('Config', [k for k, _ in defaults])
+    return Config(**dict([(k, get_value_f(k, v)) for k, v in defaults]))
 
 
 def get_config(registry):  # type: (Registry) -> namedtuple
     """Returns namedtuple instance object has configuration."""
-    get_value = get_config_value_fn(registry)
+    # HTTP Redirections (ssl_redirect.xxx)
+    ssl_redirect = _build_config(prefix='ssl_redirect', defaults=(
+        ('enabled', True),
+        ('proto_header', ''),
+        ('ignore_paths', tuple()),
+    ), registry=registry)
 
-    defaults = [
-        ('hsts_support', True),
-        ('ssl_redirect', True),
+    # HTTP Strict Transport Security (hsts_support.xxx)
+    hsts_support = _build_config(prefix='hsts_support', defaults=(
+        ('enabled', True),
+        ('proto_header', ''),
+        ('ignore_paths', tuple()),
+        ('max_age', '31536000'),  # seconds, 1 year
+        ('include_subdomains', True),
+        ('preload', True),
+    ), registry=registry)
 
+    # Shared
+    return _build_config(prefix='', defaults=(
         ('proto_header', ''),   # e.g. X-Forwarded-Proto
         ('ignore_paths', tuple()),
 
-        # HSTS Header value
-        ('hsts_max_age', '31536000'),  # seconds, 1 year
-        ('hsts_include_subdomains', True),
-        ('hsts_preload', True),
-    ]
-
-    # pylint: disable=invalid-name
-    Config = namedtuple('Config', [k for k, _ in defaults])
-    return Config(**dict([(k, get_value(k, v)) for k, v in defaults]))
+        ('ssl_redirect', ssl_redirect),
+        ('hsts_support', hsts_support),
+    ), registry=registry)
 
 
-def apply_ignore_filter(req, ignore_paths):  # type: (Request, tuple) -> bool
-    if ignore_paths:
-        return any([req.path.startswith(path) for path in ignore_paths])
+def apply_path_filter(req, paths):  # type: (Request, tuple) -> bool
+    if paths:
+        return any([req.path.startswith(path) for path in paths])
     return False
 
 
-def build_criteria(req, config):  # type: (Request, namedtuple) -> tuple
-    """Builds criteria contains about incoming request."""
+def build_criteria(req, **kwargs):  # type: (Request, dict) -> tuple
+    """Builds criteria contains about incoming request.
+
+    This function is used for following tweens:
+
+    * ssl_redirect
+    * hsts_support
+    """
     criteria = [
         req.url.startswith('https://'),
     ]
-    if config.proto_header:
-        criteria.append(
-            req.headers.get(config.proto_header, 'http') == 'https')
+    if 'proto_header' in kwargs:
+        proto_header = kwargs.get('proto_header', None)
+        if proto_header:
+            criteria.append(req.headers.get(proto_header, 'http') == 'https')
 
     return tuple(criteria)
