@@ -5,7 +5,7 @@ __all__ = (
     '__name__',  # pylint: disable=undefined-all-variable
 )
 
-__version__ = '0.0.4'
+__version__ = '0.1.0'
 
 
 def includeme(config):

@@ -1,3 +1,7 @@
+Tue 09 Jan 2018 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+	* Bump version v0.1.0
+	* Make configuration as separated by tween
+
 Fri 10 Nov 2017 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
 	* Bump version v0.0.4
 	* Add Python 2.7 support (Make type hints as comment)
