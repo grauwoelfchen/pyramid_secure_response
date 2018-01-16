@@ -55,7 +55,8 @@ setup(
     name='pyramid_secure_response',
     version=get_attr('pyramid_secure_response/__init__.py', '__version__'),
     description='A library to provide secure response header.',
-    long_description=DESCRIPTION + '\n\n' + CHANGELOG,
+    long_description='{:s}\n\nChange Logs\n~~~~~~~~~~~\n\n{:s}\n\n'.format(
+        DESCRIPTION, CHANGELOG),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
