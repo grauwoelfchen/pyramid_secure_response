@@ -20,6 +20,7 @@ def includeme(config):
 
     >>> config.add_tween('pyramid_secure_response.ssl_redirect.tween')
     >>> config.add_tween('pyramid_secure_response.hsts_support.tween')
+    >>> config.add_tween('pyramid_secure_response.csp_coverage.tween')
     """
     tween_name = (lambda name: '{:s}.{:s}.tween'.format(__name__, name))
 
@@ -27,5 +28,7 @@ def includeme(config):
                      over=tweens.MAIN)
 
     config.add_tween(tween_name('hsts_support'),
-                     over=tweens.MAIN,
-                     under=tween_name('ssl_redirect'))
+                     over=tweens.MAIN, under=tween_name('ssl_redirect'))
+
+    config.add_tween(tween_name('csp_coverage'),
+                     over=tweens.MAIN, under=tween_name('ssl_redirect'))
