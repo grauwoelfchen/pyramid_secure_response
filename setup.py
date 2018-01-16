@@ -54,7 +54,7 @@ documentation_requires = [
 setup(
     name='pyramid_secure_response',
     version=get_attr('pyramid_secure_response/__init__.py', '__version__'),
-    description='A library redirects non-http as https, sets hsts header.',
+    description='A library to provide secure response header.',
     long_description=DESCRIPTION + '\n\n' + CHANGELOG,
     classifiers=[
         'Development Status :: 4 - Beta',
