@@ -64,6 +64,44 @@ def get_config(registry):  # type: (Registry) -> namedtuple
         ('preload', True),
     ), registry=registry)
 
+    # Content Security Policy (csp_coverage.xxx)
+    csp_coverage = _build_config(prefix='csp_coverage', defaults=(
+        ('enabled', True),
+        ('ignore_paths', tuple()),
+
+        # NOTE:
+        #   These directives are appended into header as alphabetical
+        #   order by directive sections.
+        # [fetch]
+        ('child_src', ''),  # (deprecated)
+        ('connect_src', ''),
+        ('default_src', ''),
+        ('font_src', ''),
+        ('frame_src', ''),
+        ('img_src', ''),
+        ('manifest_src', ''),
+        ('media_src', ''),
+        ('object_src', ''),
+        ('script_src', ''),
+        ('style_src', ''),
+        ('worker_src', ''),
+        # [document]
+        ('base_uri', ''),
+        ('plugin_types', ''),
+        ('sandbox', ''),
+        # [navigation]
+        ('form_action', ''),
+        ('frame_ancestors', ''),
+        # [reporting]
+        ('report_uri', ''),  # (deprecated)
+        ('report_to', ''),
+        # [other]
+        ('block_all_mixed_content', False),
+        ('referrer', ''),  # (obsolete)
+        ('require_sri_for', ''),
+        ('upgrade_insecure_requests', False),
+    ), registry=registry)
+
     # Shared
     return _build_config(prefix='', defaults=(
         ('proto_header', ''),   # e.g. X-Forwarded-Proto
@@ -71,6 +109,7 @@ def get_config(registry):  # type: (Registry) -> namedtuple
 
         ('ssl_redirect', ssl_redirect),
         ('hsts_support', hsts_support),
+        ('csp_coverage', csp_coverage),
     ), registry=registry)
 
 

@@ -12,8 +12,10 @@ def test_get_config_keys(dummy_request):
     expected_keys = (
         'proto_header',
         'ignore_paths',
+        # tweens
         'ssl_redirect',
         'hsts_support',
+        'csp_coverage',
     )
     assert expected_keys == tuple(config._asdict().keys())
 
