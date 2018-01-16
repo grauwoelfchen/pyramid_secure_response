@@ -1,4 +1,5 @@
 Tue 16 Jan 2018 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
+	* Bump version v0.1.1
 	* Add csp_coverage (HTTP CSP Header support) tween
 
 Tue 09 Jan 2018 Yasuhiro Asaka <yasuhiro.asaka@grauwoelfchen.net>
